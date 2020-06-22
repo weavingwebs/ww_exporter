@@ -2,7 +2,7 @@ version: '3'
 services:
   ww_exporter:
     image: hayd/centos-deno
-    command: run --allow-net --allow-read /app/main.ts
+    command: run --allow-net --allow-read --allow-run /app/main.ts /app/examples/simple.ts
     ports:
     - 3001:80
     volumes:

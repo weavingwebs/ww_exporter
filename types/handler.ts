@@ -4,7 +4,9 @@ export type GraphQlFunction = <TQueryResponse, TQueryVariables = undefined>(
   variables?: TQueryVariables,
 ) => Promise<TQueryResponse>;
 
-export interface CsvRow {[key: string]: string}
+export type CsvValue = string|number|null|undefined;
+
+export interface CsvRow {[key: string]: CsvValue}
 
 export type ExportHandlerFunction = (
   graphql: GraphQlFunction

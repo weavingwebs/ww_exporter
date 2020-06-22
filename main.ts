@@ -1,67 +1,49 @@
-import { ExportHandler, GraphQlFunction } from './handler.ts';
-import { graphql } from './src/graphql.ts';
 import { serve } from 'https://deno.land/std@v0.58.0/http/server.ts';
-import { makeCsvRow } from './src/csv.ts';
+import { RequestPayload } from './types/request_payload.ts';
 
-const jwt = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpYXQiOjE1OTI4MzA4NDIsImV4cCI6MTU5MjgzNDQ0MiwiZHJ1cGFsIjp7InVpZCI6IjExOSJ9fQ.qxWKPXaRd2Z47R7psMVIHoJCpnEnImacCrMS_v2vF4gGHPZPC_AkW6t5ahpSSAGWlqpLiYX2ZkvGVRzSehN-r-dXS2B41_VoR4Wgbmlsw4ScJ56pw_RVwlhOlZs_5Z4W0Pwumsxtm3k4wBPkhlLS3GsRPO0M-NvEsBp-Nw7gUZ6Sa1ZO-GNzfGhC4S4oWuGfEGF4M9toYsian8S387UrPFlPP37j-k1MK3UpmF0T3cSsd8AVDpjhtp0ylyr6NRV2GqffA1WLTrWDYe0Z9U-c_utjP1gkzMyIv3b7QwN03w78l4C4JECe7Xz13ztlGkGusZSZCiav71_XK4o7qh_82w';
-const site = 'engines';
-const scriptPath = './script.ts';
 const filename = 'test.csv';
-
-const server_map = {
-  engines: 'http://engines/'
-};
 
 const server = serve({port: 80});
 console.log('Starting exporter http listener');
 for await (const request of server) {
-  const {header, handler}: ExportHandler = await import(scriptPath);
-  if (typeof header === 'undefined') {
-    throw new Error(`Export script ${scriptPath} must export 'header' (i.e. export const header: CsvRow)`);
-  }
-  if (typeof handler === 'undefined') {
-    throw new Error(`Export script ${scriptPath} must export 'handler' (i.e. export const handler: ExportHandlerFunction)`);
-  }
+  try {
+    console.log(request.method, request.url);
 
-  const handlerGql: GraphQlFunction = (uri, query, variables) => graphql(
-    `${server_map[site]}${uri}`,
-    jwt,
-    query,
-    variables,
-  );
-  const data = await handler(handlerGql);
-
-  const body = new Deno.Buffer();
-  const encoder = new TextEncoder();
-  request.respond({
-    headers: new Headers({
-      'Content-Type': 'text/csv; charset=utf-8',
-      'Content-Disposition': `attachment; filename=\"${filename}.csv\"`,
-    }),
-    body,
-  });
-
-  // Write BOM.
-  body.writeSync(new Uint8Array([0xEF, 0xBB, 0xBF]));
-
-  // Write header.
-  const row = Object.keys(header)
-    .map(key => makeCsvRow(header[key]))
-    .join(',')
-  ;
-  body.writeSync(encoder.encode(row + "\r\n"));
-
-  // Write values.
-  data.forEach(
-    row => {
-      // Loop through the header instead of the row to ensure consistent order
-      // of columns & correct handling of undefined values.
-      const csv = Object.keys(header)
-        .map(key => makeCsvRow(row[key]))
-        .join(',')
-      ;
-      body.writeSync(encoder.encode(csv + "\r\n"));
+    // We spawn a sub-process so that:
+    // a) compile errors in the handler scripts are not fatal.
+    // b) compiled handler scripts get re-compiled when changed.
+    const requestPayload: RequestPayload = {
+      scriptPath: '/app/examples/simple.ts',
+      jwt: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpYXQiOjE1OTI4MzY5NDcsImV4cCI6MTU5Mjg0MDU0NywiZHJ1cGFsIjp7InVpZCI6IjExOSJ9fQ.qqu2eNuw2MKM-AmCOmtvFDLUvA8mQ9-DwnnQx1xi-_Tj0tTtRVNkOU2Kmq_xeA1FwtzxopnrWI4Y5wNzcbr2iS54TR1emFp5xQPaVPX23k5D12MFFLAB5JtI7lM96vyFo4bQwcomtSKIC2Z6rDPWa4oN31KOFPfFxzegrkvN-XfocVCveJcDJ82QZ0e_J-EuMQaQ8oRbrxPdXqXRrvliTPhCK-gGpQ3IhagC445XTumiLTI55FwhDesCjlxNvLjvPhtNz61H-m-qDgvFcZur1E04P82zqNiBngFsoNswnuVT4MHSwBxT7umf6SesmksfVK7DyYd03uSt3s1i85K9Bw',
+      site: 'engines',
     }
-  );
+    const p = Deno.run({
+      cmd: [
+        "deno",
+        "run",
+        "--allow-read",
+        "--allow-net",
+        "/app/handle_request.ts",
+        JSON.stringify(requestPayload)
+      ],
+      stdout: "piped",
+    });
 
+    request.respond({
+      headers: new Headers({
+        'Content-Type': 'text/csv; charset=utf-8',
+        'Content-Disposition': `attachment; filename=\"${filename}.csv\"`,
+      }),
+      body: p.stdout,
+    });
+
+    if ((await p.status()).code !== 0) {
+      console.error('Handler script failed');
+    }
+
+    p.close();
+  }
+  catch (error) {
+    console.error(`Error from ${request.url}`, error);
+  }
 }

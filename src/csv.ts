@@ -1,6 +1,14 @@
-import { CsvRow } from '../handler.ts';
+import { CsvValue } from '../types/handler.ts';
 
-export const makeCsvRow = (value: string|undefined): string => {
-  value = value ? value.replace(/"/g, '""') : '';
+export const makeCsvRow = (value: CsvValue): string => {
+  if (!value) {
+    value = '';
+  }
+  else {
+    if (typeof value !== 'string') {
+      value = String(value);
+    }
+    value = value.replace(/"/g, '""');
+  }
   return `"${value}"`;
 }
