@@ -7,7 +7,7 @@ const server_map: {[key: string]: string} = {
   engines: 'http://engines/'
 };
 
-const {scriptPath, jwt, site}: RequestPayload = JSON.parse(Deno.args[0]);
+const {scriptPath, jwt, site, queryParams}: RequestPayload = JSON.parse(Deno.args[0]);
 
 const {header, handler}: ExportHandler = await import(scriptPath);
 if (typeof header === 'undefined') {
@@ -23,7 +23,7 @@ const handlerGql: GraphQlFunction = (uri, query, variables) => graphql(
   query,
   variables,
 );
-const generator = await handler(handlerGql);
+const generator = await handler(handlerGql, queryParams);
 
 const writer = Deno.stdout;
 const encoder = new TextEncoder();

@@ -1,8 +1,8 @@
 import { CsvRow, ExportHandlerFunction, pagedHandlerGenerator } from '../public/handler.ts';
 
 const query = `
-query ExampleQuery($limit: Int!, $offset: Int!) {
-  engineCodes(limit: $limit, offset: $offset) {
+query ExampleQuery($limit: Int!, $offset: Int!, $engineCode: String) {
+  engineCodes(limit: $limit, offset: $offset, filters: {engineCode: $engineCode}) {
     total
     items {
       id
@@ -29,6 +29,7 @@ interface QueryResult {
 interface QueryVariables {
   limit: number;
   offset: number;
+  engineCode: string|null;
 }
 
 export const header: CsvRow = {
@@ -37,7 +38,7 @@ export const header: CsvRow = {
   'make': 'Make',
 }
 
-export const handler: ExportHandlerFunction = async function*(graphql) {
+export const handler: ExportHandlerFunction = async function*(graphql, queryParams) {
   yield* pagedHandlerGenerator(async offset => {
     const page = await graphql<QueryResult, QueryVariables>(
       'graphql/office',
@@ -45,6 +46,7 @@ export const handler: ExportHandlerFunction = async function*(graphql) {
       {
         limit: 200,
         offset,
+        engineCode: queryParams.engineCode,
       },
     );
     return page.engineCodes;
