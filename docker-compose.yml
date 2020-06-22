@@ -1,0 +1,17 @@
+version: '3'
+services:
+  ww_exporter:
+    image: hayd/centos-deno
+    command: run --allow-net --allow-read /app/main.ts
+    ports:
+    - 3001:80
+    volumes:
+    - .:/app
+    extra_hosts:
+      - engines:172.23.0.3
+    networks:
+      - whaleblazer_www
+
+networks:
+  whaleblazer_www:
+    external: true
