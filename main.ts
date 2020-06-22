@@ -1,5 +1,4 @@
 import { serve } from 'https://deno.land/std@v0.58.0/http/server.ts';
-import * as path from 'https://deno.land/std@v0.58.0/path/mod.ts';
 import * as yaml from 'https://deno.land/std@v0.58.0/encoding/yaml.ts';
 import { getScriptPath, QueryParams, RequestPayload, Site } from './src/request_payload.ts';
 

@@ -16,6 +16,13 @@ if (typeof handler === 'undefined') {
   throw new Error(`Export script ${scriptPath} must export 'handler' (i.e. export const handler: ExportHandlerFunction)`);
 }
 
+// Check the first header item is not 'ID'.
+const headerLabels = Object.values(header);
+if (headerLabels && headerLabels[0] === 'ID') {
+  throw new Error(`You cannot use 'ID' as the first header label because Excel is stupid and will not open it. Try 'Id' instead.`)
+}
+
+// Get the generator for the requested export.
 const baseUri = site.baseUri[site.baseUri.length - 1] === '/' ? site.baseUri.substring(0, site.baseUri.length - 1) : site.baseUri;
 const handlerGql: GraphQlFunction = (uri, query, variables) => graphql(
   `${baseUri}/${uri}`,
@@ -25,6 +32,7 @@ const handlerGql: GraphQlFunction = (uri, query, variables) => graphql(
 );
 const generator = await handler(handlerGql, queryParams);
 
+// Write to stdout.
 const writer = Deno.stdout;
 const encoder = new TextEncoder();
 
