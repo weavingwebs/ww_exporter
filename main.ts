@@ -1,5 +1,5 @@
 import { serve } from 'https://deno.land/std@v0.58.0/http/server.ts';
-import { RequestPayload } from './types/request_payload.ts';
+import { RequestPayload } from './public/request_payload.ts';
 
 const filename = 'test.csv';
 
@@ -13,8 +13,8 @@ for await (const request of server) {
     // a) compile errors in the handler scripts are not fatal.
     // b) compiled handler scripts get re-compiled when changed.
     const requestPayload: RequestPayload = {
-      scriptPath: '/app/examples/simple.ts',
-      jwt: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpYXQiOjE1OTI4MzY5NDcsImV4cCI6MTU5Mjg0MDU0NywiZHJ1cGFsIjp7InVpZCI6IjExOSJ9fQ.qqu2eNuw2MKM-AmCOmtvFDLUvA8mQ9-DwnnQx1xi-_Tj0tTtRVNkOU2Kmq_xeA1FwtzxopnrWI4Y5wNzcbr2iS54TR1emFp5xQPaVPX23k5D12MFFLAB5JtI7lM96vyFo4bQwcomtSKIC2Z6rDPWa4oN31KOFPfFxzegrkvN-XfocVCveJcDJ82QZ0e_J-EuMQaQ8oRbrxPdXqXRrvliTPhCK-gGpQ3IhagC445XTumiLTI55FwhDesCjlxNvLjvPhtNz61H-m-qDgvFcZur1E04P82zqNiBngFsoNswnuVT4MHSwBxT7umf6SesmksfVK7DyYd03uSt3s1i85K9Bw',
+      scriptPath: '/app/examples/paged.ts',
+      jwt: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpYXQiOjE1OTI4NDE4MTEsImV4cCI6MTU5Mjg0NTQxMSwiZHJ1cGFsIjp7InVpZCI6IjExOSJ9fQ.j7xrJjxzwk-kjOM1j9u7V4Ed5ZgZmEPvUyFJcIfELNYZen0f7fDz_eDc9EAsywWxWXAlWUoORjnImYWrI750xcrnKG7nQx7gRovOD-SRWd2IGPR4ESyc2thDryRf-nmbhJtxKQ35-YeXh38Vw1s2VbjT2JQ9i9G-j4nIP2FnIn3Cq4f0e8dtZE4TlwCBICKHNoPuTWzL5z2z0u0ddD9IGesCez6RgfWhhw29ZckMmqDUYGzr6OGXQQlRae09vugBMJ4UFe_FKn3PFcfSJ59mFpQOvk5G64a9_4-JrbYXvqdi-MIVqouSx3Hd1NPLh4IfH7bDZfb_Nc8YPh_86EkTbA',
       site: 'engines',
     }
     const p = Deno.run({
@@ -29,7 +29,7 @@ for await (const request of server) {
       stdout: "piped",
     });
 
-    request.respond({
+    await request.respond({
       headers: new Headers({
         'Content-Type': 'text/csv; charset=utf-8',
         'Content-Disposition': `attachment; filename=\"${filename}.csv\"`,

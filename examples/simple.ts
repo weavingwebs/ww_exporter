@@ -1,4 +1,4 @@
-import { CsvRow, ExportHandlerFunction } from '../types/handler.ts';
+import { CsvRow, ExportHandlerFunction } from '../public/handler.ts';
 
 const query = `
 query {
@@ -32,7 +32,7 @@ export const header: CsvRow = {
   'make': 'Make',
 }
 
-export const handler: ExportHandlerFunction = async (graphql) => {
+export const handler: ExportHandlerFunction = async function*(graphql)  {
   const data = await graphql<QueryResult>('graphql/office', query);
-  return data.engineCodes.items;
+  yield data.engineCodes.items;
 }

@@ -1,4 +1,4 @@
-import { CsvValue } from '../types/handler.ts';
+import { CsvValue } from '../public/handler.ts';
 
 export const makeCsvRow = (value: CsvValue): string => {
   if (!value) {

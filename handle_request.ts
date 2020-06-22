@@ -1,7 +1,7 @@
-import { ExportHandler, GraphQlFunction } from './types/handler.ts';
+import { ExportHandler, GraphQlFunction } from './public/handler.ts';
 import { graphql } from './src/graphql.ts';
 import { makeCsvRow } from './src/csv.ts';
-import { RequestPayload } from './types/request_payload.ts';
+import { RequestPayload } from './public/request_payload.ts';
 
 const server_map: {[key: string]: string} = {
   engines: 'http://engines/'
@@ -23,7 +23,7 @@ const handlerGql: GraphQlFunction = (uri, query, variables) => graphql(
   query,
   variables,
 );
-const data = await handler(handlerGql);
+const generator = await handler(handlerGql);
 
 const writer = Deno.stdout;
 const encoder = new TextEncoder();
@@ -39,14 +39,16 @@ const row = Object.keys(header)
 writer.writeSync(encoder.encode(row + "\r\n"));
 
 // Write values.
-data.forEach(
-  row => {
-    // Loop through the header instead of the row to ensure consistent order
-    // of columns & correct handling of undefined values.
-    const csv = Object.keys(header)
-      .map(key => makeCsvRow(row[key]))
-      .join(',')
-    ;
-    writer.writeSync(encoder.encode(csv + "\r\n"));
-  }
-);
+for await (const data of generator) {
+  data.forEach(
+    row => {
+      // Loop through the header instead of the row to ensure consistent order
+      // of columns & correct handling of undefined values.
+      const csv = Object.keys(header)
+        .map(key => makeCsvRow(row[key]))
+        .join(',')
+      ;
+      writer.writeSync(encoder.encode(csv + "\r\n"));
+    }
+  );
+}
