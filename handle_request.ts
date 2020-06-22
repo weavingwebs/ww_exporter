@@ -1,14 +1,13 @@
 import { ExportHandler, GraphQlFunction } from './public/handler.ts';
 import { graphql } from './src/graphql.ts';
 import { makeCsvRow } from './src/csv.ts';
-import { RequestPayload } from './public/request_payload.ts';
+import { getScriptPath, RequestPayload } from './src/request_payload.ts';
 
-const server_map: {[key: string]: string} = {
-  engines: 'http://engines/'
-};
+// Parse the payload.
+const {jwt, site, exportId, queryParams}: RequestPayload = JSON.parse(Deno.args[0]);
+const scriptPath = getScriptPath(site, exportId);
 
-const {scriptPath, jwt, site, queryParams}: RequestPayload = JSON.parse(Deno.args[0]);
-
+// Import the export handler.
 const {header, handler}: ExportHandler = await import(scriptPath);
 if (typeof header === 'undefined') {
   throw new Error(`Export script ${scriptPath} must export 'header' (i.e. export const header: CsvRow)`);
@@ -17,8 +16,9 @@ if (typeof handler === 'undefined') {
   throw new Error(`Export script ${scriptPath} must export 'handler' (i.e. export const handler: ExportHandlerFunction)`);
 }
 
+const baseUri = site.baseUri[site.baseUri.length - 1] === '/' ? site.baseUri.substring(0, site.baseUri.length - 1) : site.baseUri;
 const handlerGql: GraphQlFunction = (uri, query, variables) => graphql(
-  `${server_map[site]}${uri}`,
+  `${site.baseUri}/${uri}`,
   jwt,
   query,
   variables,

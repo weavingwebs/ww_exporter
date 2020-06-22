@@ -1,4 +1,4 @@
-import { QueryParams } from './request_payload.ts';
+import { QueryParams } from '../src/request_payload.ts';
 
 export type GraphQlFunction = <TQueryResponse, TQueryVariables = undefined>(
   uri: string,
