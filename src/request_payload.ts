@@ -1,7 +1,7 @@
 import * as path from 'https://deno.land/std@v0.58.0/path/mod.ts';
 
 export interface RequestPayload {
-  jwt: string;
+  authHeader: string|null;
   site: Site;
   exportId: string;
   queryParams: QueryParams;

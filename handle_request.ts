@@ -4,7 +4,7 @@ import { makeCsvRow } from './src/csv.ts';
 import { getScriptPath, RequestPayload } from './src/request_payload.ts';
 
 // Parse the payload.
-const {jwt, site, exportId, queryParams}: RequestPayload = JSON.parse(Deno.args[0]);
+const {authHeader, site, exportId, queryParams}: RequestPayload = JSON.parse(Deno.args[0]);
 const scriptPath = getScriptPath(site, exportId);
 
 // Import the export handler.
@@ -18,8 +18,8 @@ if (typeof handler === 'undefined') {
 
 const baseUri = site.baseUri[site.baseUri.length - 1] === '/' ? site.baseUri.substring(0, site.baseUri.length - 1) : site.baseUri;
 const handlerGql: GraphQlFunction = (uri, query, variables) => graphql(
-  `${site.baseUri}/${uri}`,
-  jwt,
+  `${baseUri}/${uri}`,
+  authHeader,
   query,
   variables,
 );

@@ -10,17 +10,20 @@ interface GraphqlResponse<T> {
 
 export const graphql = async <TQueryResponse, TQueryVariables = undefined>(
   uri: string,
-  jwt: string,
+  authHeader: string|null,
   query: string,
   variables?: TQueryVariables,
 ) => {
+  const headers = new Headers({
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+  });
+  if (authHeader) {
+    headers.set('Authorization', authHeader);
+  }
   const resp = await fetch(uri, {
     method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      Authorization: `Bearer ${jwt}`,
-      'Content-Type': 'application/json',
-    },
+    headers,
     body: JSON.stringify({query, variables}),
   });
 

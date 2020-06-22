@@ -88,7 +88,7 @@ for await (const request of server) {
     // a) compile errors in the handler scripts are not fatal.
     // b) compiled handler scripts get re-compiled when changed.
     const requestPayload: RequestPayload = {
-      jwt: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpYXQiOjE1OTI4NTEzMzEsImV4cCI6MTU5Mjg1NDkzMSwiZHJ1cGFsIjp7InVpZCI6IjExOSJ9fQ.EfmxKN0b1uWopcTYmvO0rl85605J9jNkEe7QJvRVL_WQZdnjUphUNcgmMD_PQ-2pVVFJWW6nOWC0l1aVkbwTkhPMZAm6U7Wt6-Zk6vtuI6dqIzwifUIJNUH7E-B82JWmrF34n7-YcAKo6AkCVEfNe0xnvxoHqqAIa2903g54iC6NBi-tuNPBtWv8mcf7a1OAaTt01-GRQ9KQQ1p3D8DbwwiyI7p-VAlWy_BUtNMxEEmCecPFWYd_op9zEFWT6Wfsv__Bg8w0jOd0lXJaHVcAI2OLAT33MS_L17F1qlFrySPuFLQlUeCNpToRChdo8Tny79Ys0JHGS8b9J0r9YGfpEQ',
+      authHeader: request.headers.get('Authorization'),
       site,
       exportId,
       queryParams,
