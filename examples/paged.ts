@@ -29,25 +29,29 @@ interface QueryResult {
 interface QueryVariables {
   limit: number;
   offset: number;
-  engineCode: string|null;
+  engineCode?: string|null;
 }
 
 export const header: CsvRow = {
-  'id': 'ID',
+  'id': 'Id',
   'engineCode': 'Engine Code',
   'make': 'Make',
 }
 
 export const handler: ExportHandlerFunction = async function*(graphql, queryParams) {
   yield* pagedHandlerGenerator(async offset => {
+    const input: QueryVariables = {
+      limit: 200,
+      offset,
+    }
+    if (queryParams.engineCode && typeof queryParams.engineCode === 'string') {
+      input.engineCode = queryParams.engineCode;
+    }
+
     const page = await graphql<QueryResult, QueryVariables>(
       'graphql/office',
       query,
-      {
-        limit: 200,
-        offset,
-        engineCode: queryParams.engineCode,
-      },
+      input,
     );
     return page.engineCodes;
   });

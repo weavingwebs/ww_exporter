@@ -12,7 +12,7 @@ export interface Site {
   baseUri: string
 }
 
-export interface QueryParams {[key: string]: string|null}
+export interface QueryParams {[key: string]: string[]|string|null}
 
 export const getScriptPath = (site: Site, exportId: string) =>
   path.join(site.path, path.basename(exportId) + '.ts')
