@@ -68,7 +68,6 @@ func requestHandler(resp http.ResponseWriter, req *http.Request) {
 		http.Error(resp, fmt.Sprintf("Unknown Site: %s", siteId), 400)
 		return
 	}
-	log.Println(site.BaseUri)
 	v := validator.New()
 	if err := v.Struct(site); err != nil {
 		log.Printf("Invalid config: %v", err)
@@ -76,12 +75,30 @@ func requestHandler(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	// Try and get auth from header, then from request body.
+	authHeader := req.Header.Get("Authorization")
+	if authHeader == "" && req.Method == "POST" {
+		if req.Header.Get("Content-Type") != "application/json" {
+			http.Error(resp, "application/json is required", 400)
+			return
+		}
+		var data map[string]string
+		if err := json.NewDecoder(req.Body).Decode(&data); err != nil {
+			http.Error(resp, fmt.Sprintf("Invalid json in request body: %v", err), 400)
+			return
+		}
+		val, ok := data["authToken"]
+		if ok {
+			authHeader = fmt.Sprintf("Bearer %s", val)
+		}
+	}
+
 	// @todo filename.
 	fileName := "test.csv"
 
 	// Build the payload to pass to deno handler.
 	payload := &RequestPayload{
-		AuthHeader:  req.Header.Get("Authorization"),
+		AuthHeader:  authHeader,
 		Site:        *site,
 		ExportId:    exportId,
 		QueryParams: req.URL.Query(),
@@ -127,7 +144,7 @@ func requestHandler(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	log.Println("Request completed 👍")
+	log.Println("Export completed successfully 👍")
 }
 
 func main() {
