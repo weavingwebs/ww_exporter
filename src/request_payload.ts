@@ -17,3 +17,14 @@ export interface QueryParams {[key: string]: string[]|string|null}
 export const getScriptPath = (site: Site, exportId: string) =>
   path.join(site.path, path.basename(exportId) + '.ts')
 ;
+
+export const getStringFromQuery = (query: QueryParams, key: string) => {
+  const val = query[key];
+  if (typeof val === 'undefined') {
+    return undefined;
+  }
+  if (val && Array.isArray(val)) {
+    return val[0];
+  }
+  return val;
+}

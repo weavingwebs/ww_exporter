@@ -1,4 +1,5 @@
 import { CsvRow, ExportHandlerFunction, pagedHandlerGenerator } from '../public/handler.ts';
+import { getStringFromQuery } from '../src/request_payload.ts';
 
 const query = `
 query ExampleQuery($limit: Int!, $offset: Int!, $engineCode: String) {
@@ -40,18 +41,14 @@ export const header: CsvRow = {
 
 export const handler: ExportHandlerFunction = async function*(graphql, queryParams) {
   yield* pagedHandlerGenerator(async offset => {
-    const input: QueryVariables = {
-      limit: 200,
-      offset,
-    }
-    if (queryParams.engineCode && typeof queryParams.engineCode === 'string') {
-      input.engineCode = queryParams.engineCode;
-    }
-
     const page = await graphql<QueryResult, QueryVariables>(
       'graphql/office',
       query,
-      input,
+      {
+        limit: 200,
+        offset,
+        engineCode: getStringFromQuery(queryParams, 'engineCode'),
+      },
     );
     return page.engineCodes;
   });
