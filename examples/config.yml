@@ -1,3 +1,3 @@
-engines:
+example:
   path: /app/examples
   baseUri: http://engines
