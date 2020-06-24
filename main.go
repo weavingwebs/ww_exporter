@@ -34,19 +34,24 @@ func requestHandler(resp http.ResponseWriter, req *http.Request) {
 	// Parse path.
 	urlParts := strings.Split(req.URL.Path, "/")
 	if len(urlParts) == 1 {
-		http.Error(resp, "Missing Site id from url", 404)
+		http.Error(resp, "Missing Site id from url path", 404)
 		return
 	}
 	if len(urlParts) == 2 {
-		http.Error(resp, "Missing export id from url", 404)
+		http.Error(resp, "Missing export id from url path", 404)
 		return
 	}
-	if len(urlParts) != 3 {
+	if len(urlParts) == 3 {
+		http.Error(resp, "Missing filename from url path", 404)
+		return
+	}
+	if len(urlParts) != 4 {
 		http.NotFound(resp, req)
 		return
 	}
 	siteId := urlParts[1]
 	exportId := urlParts[2]
+	fileName := urlParts[3]
 
 	// Read config.
 	configRaw, err := ioutil.ReadFile("/app/config.yml")
@@ -92,9 +97,6 @@ func requestHandler(resp http.ResponseWriter, req *http.Request) {
 			authHeader = fmt.Sprintf("Bearer %s", val)
 		}
 	}
-
-	// @todo filename.
-	fileName := "test.csv"
 
 	// Build the payload to pass to deno handler.
 	payload := &RequestPayload{
