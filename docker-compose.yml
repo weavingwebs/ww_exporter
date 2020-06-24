@@ -6,6 +6,7 @@ services:
     - 3001:80
     volumes:
     - .:/app
+    - /www:/www
     extra_hosts:
       - engines:172.23.0.3
     networks:
