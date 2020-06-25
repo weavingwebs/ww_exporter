@@ -1,5 +1,3 @@
-import { QueryParams } from '../src/request_payload.ts';
-
 export type GraphQlFunction = <TQueryResponse, TQueryVariables = undefined>(
   uri: string,
   query: string,
@@ -10,9 +8,40 @@ export type CsvValue = string|number|null|undefined;
 
 export interface CsvRow {[key: string]: CsvValue}
 
-export type ExportHandlerFunction = <T extends QueryParams = {}>(
-  graphql: GraphQlFunction,
-  queryParams: T,
+export interface Site {
+  path: string
+  baseUri: string
+}
+
+export interface QueryParams {
+  [key: string]: string[] | string | null
+}
+
+export const getStringFromQuery = (query: QueryParams, key: string) => {
+  const val = query[key];
+  if (typeof val === 'undefined') {
+    return undefined;
+  }
+  if (val && Array.isArray(val)) {
+    return val[0];
+  }
+  return val;
+}
+
+export interface ExportHandlerParams<
+  V extends object = {},
+  Q extends QueryParams = {},
+> {
+  graphql: GraphQlFunction
+  queryParams: Q
+  variables: V|null
+}
+
+export type ExportHandlerFunction<
+V extends object = {},
+Q extends QueryParams = {},
+> = (
+  params: ExportHandlerParams<V, Q>,
 ) => AsyncGenerator<CsvRow[]>;
 
 export interface ExportHandler {

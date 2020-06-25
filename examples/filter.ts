@@ -26,13 +26,24 @@ interface QueryResult {
   }
 }
 
+interface QueryVariables {
+  engineCode: string|null;
+}
+
 export const header: CsvRow = {
   'id': 'Id',
   'engineCode': 'Engine Code',
   'make': 'Make',
 }
 
-export const handler: ExportHandlerFunction = async function*({graphql})  {
-  const data = await graphql<QueryResult>('graphql/office', query);
+export const handler: ExportHandlerFunction<QueryVariables> = async function*({graphql, variables})  {
+  if (!variables) {
+    throw new Error('Missing variables');
+  }
+  const data = await graphql<QueryResult, QueryVariables>(
+    'graphql/office',
+    query,
+    variables
+  );
   yield data.engineCodes.items;
 }

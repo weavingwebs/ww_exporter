@@ -1,11 +1,19 @@
-import { ExportHandler, GraphQlFunction } from './public/handler.ts';
+import * as path from 'https://deno.land/std@v0.58.0/path/mod.ts';
+import { ExportHandler, GraphQlFunction, QueryParams, Site } from './public/handler.ts';
 import { graphql } from './src/graphql.ts';
 import { makeCsvRow } from './src/csv.ts';
-import { getScriptPath, RequestPayload } from './src/request_payload.ts';
+
+interface ExportPayload<V extends object = {}> {
+  authHeader: string|null;
+  site: Site;
+  exportId: string;
+  queryParams: QueryParams;
+  variables: V|null;
+}
 
 // Parse the payload.
-const {authHeader, site, exportId, queryParams}: RequestPayload = JSON.parse(Deno.args[0]);
-const scriptPath = getScriptPath(site, exportId);
+const {authHeader, site, exportId, queryParams, variables}: ExportPayload = JSON.parse(Deno.args[0]);
+const scriptPath = path.join(site.path, path.basename(exportId) + '.ts');
 
 // Import the export handler.
 const {header, handler}: ExportHandler = await import(scriptPath);
@@ -24,13 +32,13 @@ if (headerLabels && headerLabels[0] === 'ID') {
 
 // Get the generator for the requested export.
 const baseUri = site.baseUri[site.baseUri.length - 1] === '/' ? site.baseUri.substring(0, site.baseUri.length - 1) : site.baseUri;
-const handlerGql: GraphQlFunction = (uri, query, variables) => graphql(
+const handlerGql: GraphQlFunction = (uri, query, vars) => graphql(
   `${baseUri}/${uri}`,
   authHeader,
   query,
-  variables,
+  vars,
 );
-const generator = await handler(handlerGql, queryParams);
+const generator = await handler({graphql: handlerGql, queryParams, variables});
 
 // Write to stdout.
 const writer = Deno.stdout;

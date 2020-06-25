@@ -21,11 +21,17 @@ type Site struct {
 	BaseUri string `validate:"required" json:"baseUri" yaml:"baseUri"`
 }
 
-type RequestPayload struct {
-	AuthHeader  string     `json:"authHeader"`
-	Site        Site       `json:"site"`
-	ExportId    string     `json:"exportId"`
-	QueryParams url.Values `json:"queryParams"`
+type RequestBody struct {
+	AuthToken string                 `json:"authToken"`
+	Variables map[string]interface{} `json:"variables"`
+}
+
+type HandlerPayload struct {
+	AuthHeader  string                 `json:"authHeader"`
+	Site        Site                   `json:"site"`
+	ExportId    string                 `json:"exportId"`
+	QueryParams url.Values             `json:"queryParams"`
+	Variables   map[string]interface{} `json:"variables"`
 }
 
 func requestHandler(resp http.ResponseWriter, req *http.Request) {
@@ -80,30 +86,32 @@ func requestHandler(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// Try and get auth from header, then from request body.
-	authHeader := req.Header.Get("Authorization")
-	if authHeader == "" && req.Method == "POST" {
+	// Parse request body if given.
+	var requestBody RequestBody
+	if req.Method == "POST" {
 		if req.Header.Get("Content-Type") != "application/json" {
 			http.Error(resp, "application/json is required", 400)
 			return
 		}
-		var data map[string]string
-		if err := json.NewDecoder(req.Body).Decode(&data); err != nil {
+		if err := json.NewDecoder(req.Body).Decode(&requestBody); err != nil {
 			http.Error(resp, fmt.Sprintf("Invalid json in request body: %v", err), 400)
 			return
 		}
-		val, ok := data["authToken"]
-		if ok {
-			authHeader = fmt.Sprintf("Bearer %s", val)
-		}
+	}
+
+	// Try and get auth from header, then from request body.
+	authHeader := req.Header.Get("Authorization")
+	if authHeader == "" && requestBody.AuthToken != "" {
+		authHeader = fmt.Sprintf("Bearer %s", requestBody.AuthToken)
 	}
 
 	// Build the payload to pass to deno handler.
-	payload := &RequestPayload{
+	payload := &HandlerPayload{
 		AuthHeader:  authHeader,
 		Site:        *site,
 		ExportId:    exportId,
 		QueryParams: req.URL.Query(),
+		Variables:   requestBody.Variables,
 	}
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {

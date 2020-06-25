@@ -1,5 +1,4 @@
-import { CsvRow, ExportHandlerFunction, pagedHandlerGenerator } from '../public/handler.ts';
-import { getStringFromQuery } from '../src/request_payload.ts';
+import { CsvRow, ExportHandlerFunction, getStringFromQuery, pagedHandlerGenerator } from '../public/handler.ts';
 
 const query = `
 query ExampleQuery($limit: Int!, $offset: Int!, $engineCode: String) {
@@ -39,7 +38,7 @@ export const header: CsvRow = {
   'make': 'Make',
 }
 
-export const handler: ExportHandlerFunction = async function*(graphql, queryParams) {
+export const handler: ExportHandlerFunction = async function*({graphql, queryParams}) {
   yield* pagedHandlerGenerator(async offset => {
     const page = await graphql<QueryResult, QueryVariables>(
       'graphql/office',
