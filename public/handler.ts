@@ -4,7 +4,12 @@ export type GraphQlFunction = <TQueryResponse, TQueryVariables = undefined>(
   variables?: TQueryVariables,
 ) => Promise<TQueryResponse>;
 
-export type CsvValue = string|number|null|undefined;
+export interface Price {
+  number: string;
+  currency_code: string;
+}
+
+export type CsvValue = string|number|Price|null|undefined;
 
 export interface CsvRow {[key: string]: CsvValue}
 
