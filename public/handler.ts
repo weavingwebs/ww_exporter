@@ -38,8 +38,8 @@ export interface ExportHandlerParams<
 }
 
 export type ExportHandlerFunction<
-V extends object = {},
-Q extends QueryParams = {},
+  V extends object = {},
+  Q extends QueryParams = {},
 > = (
   params: ExportHandlerParams<V, Q>,
 ) => AsyncGenerator<CsvRow[]>;
@@ -51,7 +51,10 @@ export interface ExportHandler {
 
 export type PagedHandlerGeneratorGraphql<T> = (offset: number) => Promise<T>
 
-export const pagedHandlerGenerator = async function*<T extends {total: number, items: any[]}>(
+export const pagedHandlerGenerator = async function*<
+  T extends {total: number, items: I[]},
+  I extends object = {},
+>(
   graphql: PagedHandlerGeneratorGraphql<T>,
 ) {
   let offset = 0;
