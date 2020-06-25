@@ -89,13 +89,25 @@ func requestHandler(resp http.ResponseWriter, req *http.Request) {
 	// Parse request body if given.
 	var requestBody RequestBody
 	if req.Method == "POST" {
-		if req.Header.Get("Content-Type") != "application/json" {
-			http.Error(resp, "application/json is required", 400)
-			return
-		}
-		if err := json.NewDecoder(req.Body).Decode(&requestBody); err != nil {
-			http.Error(resp, fmt.Sprintf("Invalid json in request body: %v", err), 400)
-			return
+		if req.Header.Get("Content-Type") == "application/json" {
+			if err := json.NewDecoder(req.Body).Decode(&requestBody); err != nil {
+				http.Error(resp, fmt.Sprintf("Invalid json in request body: %v", err), 400)
+				return
+			}
+		} else {
+			if err := req.ParseForm(); err != nil {
+				http.Error(resp, fmt.Sprintf("Invalid request body: %v", err), 400)
+				return
+			}
+			formJson := req.Form.Get("json")
+			if formJson == "" {
+				http.Error(resp, "You must POST application/json or form data with a value 'json'", 400)
+				return
+			}
+			if err := json.Unmarshal([]byte(formJson), &requestBody); err != nil {
+				http.Error(resp, fmt.Sprintf("Invalid json in form data: %v", err), 400)
+				return
+			}
 		}
 	}
 
