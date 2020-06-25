@@ -32,26 +32,26 @@ func requestHandler(resp http.ResponseWriter, req *http.Request) {
 	log.Printf("%s %s %s", req.RemoteAddr, req.Method, req.URL)
 
 	// Parse path.
-	urlParts := strings.Split(req.URL.Path, "/")
-	if len(urlParts) == 1 {
+	urlParts := strings.Split(strings.Trim(req.URL.Path, "/"), "/")
+	if len(urlParts) == 0 {
 		http.Error(resp, "Missing Site id from url path", 404)
 		return
 	}
-	if len(urlParts) == 2 {
+	if len(urlParts) == 1 {
 		http.Error(resp, "Missing export id from url path", 404)
 		return
 	}
-	if len(urlParts) == 3 {
+	if len(urlParts) == 2 {
 		http.Error(resp, "Missing filename from url path", 404)
 		return
 	}
-	if len(urlParts) != 4 {
+	if len(urlParts) != 3 {
 		http.NotFound(resp, req)
 		return
 	}
-	siteId := urlParts[1]
-	exportId := urlParts[2]
-	fileName := urlParts[3]
+	siteId := urlParts[0]
+	exportId := urlParts[1]
+	fileName := urlParts[2]
 
 	// Read config.
 	configRaw, err := ioutil.ReadFile("/app/config.yml")
