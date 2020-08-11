@@ -1,4 +1,4 @@
-import * as path from 'https://deno.land/std@v0.58.0/path/mod.ts';
+import * as path from 'https://deno.land/std@v0.64.0/path/mod.ts';
 import { ExportHandler, GraphQlFunction, QueryParams, Site } from './public/handler.ts';
 import { graphql } from './src/graphql.ts';
 import { makeCsvRow } from './src/csv.ts';
