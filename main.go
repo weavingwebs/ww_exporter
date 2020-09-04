@@ -99,7 +99,7 @@ func requestHandler(resp http.ResponseWriter, req *http.Request) {
 	// Parse request body if given.
 	var requestBody RequestBody
 	if req.Method == "POST" {
-		if req.Header.Get("Content-Type") == "application/json" {
+		if strings.Contains(req.Header.Get("Content-Type"), "application/json") {
 			if err := json.NewDecoder(req.Body).Decode(&requestBody); err != nil {
 				http.Error(resp, fmt.Sprintf("Invalid json in request body: %v", err), 400)
 				return
