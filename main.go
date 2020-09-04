@@ -154,6 +154,7 @@ func requestHandler(resp http.ResponseWriter, req *http.Request) {
 	// Start sending response.
 	resp.Header().Set("Content-Type", "text/csv; charset=utf-8")
 	resp.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, fileName))
+	resp.Header().Set("Access-Control-Allow-Origin", "*")
 	if _, err := io.Copy(resp, stdOut); err != nil {
 		log.Printf("Error copying stdout %v", err)
 		return
