@@ -64,7 +64,13 @@ for await (const data of generator) {
         .map(key => makeCsvRow(row[key]))
         .join(',')
       ;
-      writer.writeSync(encoder.encode(csv + "\r\n"));
+
+      // NOTE: Technically CSVs should use CRLF but macOS mail mangles
+      // attachments to add a duplicate CR at the end of every line, resulting
+      // in most csv parses getting empty lines between each row. Luckily MS are
+      // not nearly as moronic as apple these days and will happily interpret
+      // CSVs with LF endings.
+      writer.writeSync(encoder.encode(csv + "\n"));
     }
   );
 }
