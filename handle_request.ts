@@ -52,7 +52,7 @@ const row = Object.keys(header)
   .map(key => makeCsvRow(header[key]))
   .join(',')
 ;
-writer.writeSync(encoder.encode(row + "\r"));
+writer.writeSync(encoder.encode(row + "\n"));
 
 // Write values.
 for await (const data of generator) {
