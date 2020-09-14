@@ -1,7 +1,7 @@
 import { CsvValue } from '../public/handler.ts';
 import { formatPrice } from '../public/formatPrice.ts';
 
-export const makeCsvRow = (value: CsvValue): string => {
+export const makeCsvValue = (value: CsvValue): string => {
   if (!value) {
     value = '';
   }

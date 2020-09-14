@@ -1,7 +1,7 @@
 import * as path from 'https://deno.land/std@v0.64.0/path/mod.ts';
 import { ExportHandler, GraphQlFunction, QueryParams, Site } from './public/handler.ts';
 import { graphql } from './src/graphql.ts';
-import { makeCsvRow } from './src/csv.ts';
+import { makeCsvValue } from './src/csv.ts';
 
 interface ExportPayload<V extends object = {}> {
   authHeader: string|null;
@@ -9,10 +9,13 @@ interface ExportPayload<V extends object = {}> {
   exportId: string;
   queryParams: QueryParams;
   variables: V|null;
+  csvDelimiter: string|null;
 }
 
 // Parse the payload.
-const {authHeader, site, exportId, queryParams, variables}: ExportPayload = JSON.parse(Deno.args[0]);
+const payload: ExportPayload = JSON.parse(Deno.args[0]);
+const {authHeader, site, exportId, queryParams, variables} = payload;
+const csvDelimiter = payload.csvDelimiter ? payload.csvDelimiter : ',';
 const scriptPath = path.join(site.path, path.basename(exportId) + '.ts');
 
 // Import the export handler.
@@ -49,8 +52,8 @@ writer.writeSync(new Uint8Array([0xEF, 0xBB, 0xBF]));
 
 // Write header.
 const row = Object.keys(header)
-  .map(key => makeCsvRow(header[key]))
-  .join(',')
+  .map(key => makeCsvValue(header[key]))
+  .join(csvDelimiter)
 ;
 writer.writeSync(encoder.encode(row + "\n"));
 
@@ -61,8 +64,8 @@ for await (const data of generator) {
       // Loop through the header instead of the row to ensure consistent order
       // of columns & correct handling of undefined values.
       const csv = Object.keys(header)
-        .map(key => makeCsvRow(row[key]))
-        .join(',')
+        .map(key => makeCsvValue(row[key]))
+        .join(csvDelimiter)
       ;
 
       // NOTE: Technically CSVs should use CRLF but macOS mail mangles

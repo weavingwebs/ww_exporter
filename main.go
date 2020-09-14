@@ -22,16 +22,18 @@ type Site struct {
 }
 
 type RequestBody struct {
-	AuthToken string                 `json:"authToken"`
-	Variables map[string]interface{} `json:"variables"`
+	AuthToken    string                 `json:"authToken"`
+	Variables    map[string]interface{} `json:"variables"`
+	CsvDelimiter string                 `json:"csvDelimiter"`
 }
 
 type HandlerPayload struct {
-	AuthHeader  string                 `json:"authHeader"`
-	Site        Site                   `json:"site"`
-	ExportId    string                 `json:"exportId"`
-	QueryParams url.Values             `json:"queryParams"`
-	Variables   map[string]interface{} `json:"variables"`
+	AuthHeader   string                 `json:"authHeader"`
+	Site         Site                   `json:"site"`
+	ExportId     string                 `json:"exportId"`
+	QueryParams  url.Values             `json:"queryParams"`
+	Variables    map[string]interface{} `json:"variables"`
+	CsvDelimiter string                 `json:"csvDelimiter"`
 }
 
 func requestHandler(resp http.ResponseWriter, req *http.Request) {
@@ -129,11 +131,12 @@ func requestHandler(resp http.ResponseWriter, req *http.Request) {
 
 	// Build the payload to pass to deno handler.
 	payload := &HandlerPayload{
-		AuthHeader:  authHeader,
-		Site:        *site,
-		ExportId:    exportId,
-		QueryParams: req.URL.Query(),
-		Variables:   requestBody.Variables,
+		AuthHeader:   authHeader,
+		Site:         *site,
+		ExportId:     exportId,
+		QueryParams:  req.URL.Query(),
+		Variables:    requestBody.Variables,
+		CsvDelimiter: requestBody.CsvDelimiter,
 	}
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
