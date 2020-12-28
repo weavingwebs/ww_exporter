@@ -1,0 +1,19 @@
+name: Build docker image
+on:
+  push:
+    branches:
+      - master
+jobs:
+  push_to_registry:
+    name: Push Docker image to GitHub Packages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@master
+      - name: Push to GitHub Packages
+        uses: weavingwebs/ww-docker-build-action@1.0.1
+        with:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}/ww_exporter
+          push: "1"
