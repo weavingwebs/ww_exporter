@@ -10,6 +10,8 @@ jobs:
     steps:
       - name: Check out the repo
         uses: actions/checkout@master
+      - name: Docker layer cache
+        uses: satackey/action-docker-layer-caching@v0.0.11
       - name: Push to GitHub Packages
         uses: weavingwebs/ww-docker-build-action@1.0.1
         with:
