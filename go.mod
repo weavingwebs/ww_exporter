@@ -1,4 +1,4 @@
-module git.weavingwebs.co.uk/apps/ww_exporter
+module github.com/weavingwebs/ww_exporter
 
 go 1.14
 
