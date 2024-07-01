@@ -14,11 +14,7 @@ COPY . .
 RUN ./scripts/build.sh
 
 # Runner image.
-FROM hayd/centos-deno:1.2.3
-
-# Update ca-certificates.
-RUN yum -y update && yum -y install ca-certificates && yum clean all
-
+FROM hayd/centos-deno:1.10.2
 WORKDIR /app
 COPY . .
 COPY --from=builder /app/dist /app/dist
