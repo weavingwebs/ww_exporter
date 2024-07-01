@@ -8,7 +8,7 @@ services:
     - .:/app
     - /www:/www
     extra_hosts:
-      - engines:172.23.0.3
+      - engines:172.23.0.4
     networks:
       - whaleblazer_www
 
